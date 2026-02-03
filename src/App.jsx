@@ -10,6 +10,7 @@ import { Admin } from './pages/Admin'
 import { Login } from './pages/Login'
 import { MyBookings } from './pages/MyBookings'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { AdminRoute } from './components/AdminRoute'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -30,7 +31,7 @@ const App = () => {
         <Route path="/mybookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
 
         {/* Admin Route */}
-        <Route path="/admin" element={<ProtectedRoute role="admin"><Admin /></ProtectedRoute>} />
+        <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
       </Routes>
     </>
   )
