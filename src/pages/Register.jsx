@@ -26,6 +26,7 @@ export const Register = () => {
         uid: user.uid,
         name: name,
         email: email,
+         role: "user",  
         createdAt: new Date()
       });
 
@@ -46,6 +47,7 @@ export const Register = () => {
         uid: user.uid,
         name: user.displayName,
         email: user.email,
+        role: "user",
         createdAt: new Date()
       }, { merge: true });
 

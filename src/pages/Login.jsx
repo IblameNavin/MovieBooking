@@ -15,8 +15,9 @@ export const Login = () => {
     const token = await user.getIdToken();
     Cookies.set("token", token, { expires: 1 / 12 }); // 2 hours
 
-    // Check if user is admin (simple hardcoded check for demo)
-    const role = user.email === "[EMAIL_ADDRESS]" ? "admin" : "user";
+    // Fetch role from Firestore
+    const userDoc = await getDoc(doc(db, "contacts", user.uid));
+    const role = userDoc.exists() ? userDoc.data().role : "user";
     Cookies.set("role", role, { expires: 1 / 12 });
 
     toast.success(`Welcome back, ${user.displayName || user.email} !`);
@@ -43,13 +44,14 @@ export const Login = () => {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      // Ensure user exists in firestore, if not add them
+      // Ensure user exists with role
       const userDoc = await getDoc(doc(db, "contacts", user.uid));
       if (!userDoc.exists()) {
         await setDoc(doc(db, "contacts", user.uid), {
           uid: user.uid,
           name: user.displayName,
           email: user.email,
+          role: "user",
           createdAt: new Date()
         }, { merge: true });
       }
