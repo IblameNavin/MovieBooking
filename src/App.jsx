@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Routes, Route } from "react-router-dom"
 import { Home } from './components/Home'
 import { MovieDashboard } from './pages/MovieDashboard'
@@ -13,8 +13,13 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { seedFirestore } from './seed/seedData'
 
 const App = () => {
+  useEffect(() => {
+  seedFirestore()
+  }, [])
+  
   return (
     <>
       <Navbar />
