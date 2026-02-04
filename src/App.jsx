@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Routes, Route } from "react-router-dom"
 import { Home } from './components/Home'
 import { MovieDashboard } from './pages/MovieDashboard'
@@ -13,13 +13,9 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { AdminRoute } from './components/AdminRoute'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { seedFirestore } from './seed/seedData'
+import { Seeder } from './pages/Seeder';
 
 const App = () => {
-  useEffect(() => {
-  seedFirestore()
-  }, [])
-  
   return (
     <>
       <Navbar />
@@ -37,6 +33,9 @@ const App = () => {
 
         {/* Admin Route */}
         <Route path="/admin" element={<AdminRoute><Admin /></AdminRoute>} />
+
+        {/* Helper Route */}
+        <Route path="/seed" element={<Seeder />} />
       </Routes>
     </>
   )

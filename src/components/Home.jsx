@@ -2,23 +2,27 @@ import React, { useEffect, useState } from "react";
 import { Footer } from "./Footer";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../config/firebase";
+import { useNavigate } from "react-router-dom";
+
 export const Home = () => {
   const [movies, setMovies] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const navigate = useNavigate();
 
-  const API_URL = "https://api.themoviedb.org/3/discover/movie?api_key=80d491707d8cf7b38aa19c7ccab0952f";
   const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w1280";
   const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
+        const querySnapshot = await getDocs(collection(db, "movies"));
+        const moviesList = querySnapshot.docs.map(doc => doc.data());
         // Take first 16 movies
-        setMovies(data.results.slice(0, 16));
+        setMovies(moviesList.slice(0, 16));
       } catch (error) {
-        console.error("Error fetching movies:", error);
+        console.error("Error fetching movies from Firebase:", error);
       }
     };
 
@@ -74,10 +78,16 @@ export const Home = () => {
                 {movie.title}
               </p>
               <div className="flex gap-4">
-                <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full font-semibold transition transform hover:scale-105 shadow-lg">
+                <button
+                  onClick={() => navigate(`/movies/${movie.id}`)}
+                  className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-full font-semibold transition transform hover:scale-105 shadow-lg"
+                >
                   Book Now
                 </button>
-                <button className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-8 py-3 rounded-full font-semibold transition border border-white/30">
+                <button
+                  onClick={() => navigate('/movies')}
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white px-8 py-3 rounded-full font-semibold transition border border-white/30"
+                >
                   See Locations
                 </button>
               </div>
@@ -121,6 +131,7 @@ export const Home = () => {
           {movies.map((movie) => (
             <div
               key={movie.id}
+              onClick={() => navigate(`/movies/${movie.id}`)}
               className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition duration-300 transform hover:-translate-y-2 cursor-pointer"
             >
               <div className="relative overflow-hidden aspect-[2/3]">

@@ -2,20 +2,22 @@ import React, { useEffect, useState } from "react";
 import { Footer } from "../components/Footer";
 import { Link, useNavigate } from "react-router-dom";
 
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../config/firebase";
+
 export const Movies = () => {
   const [movies, setMovies] = useState([]);
-  const API_URL = "https://api.themoviedb.org/3/discover/movie?api_key=80d491707d8cf7b38aa19c7ccab0952f";
   const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const response = await fetch(API_URL);
-        const data = await response.json();
-        setMovies(data.results);
+        const querySnapshot = await getDocs(collection(db, "movies"));
+        const moviesList = querySnapshot.docs.map(doc => doc.data());
+        setMovies(moviesList);
       } catch (error) {
-        console.error("Error fetching movies:", error);
+        console.error("Error fetching movies from Firebase:", error);
       }
     };
     fetchMovies();

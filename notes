@@ -1,2 +1,8 @@
 Put api keys in .env
 add env from deploment settings in vercel
+
+
+                                                            
+                                                            Today's task:
+
+ show data from firebase if not already shown...delete data from firebase and show real data...grab data from api at least 20-35...copy and paste into movies....generate id of theartre, at least 8-10 fields in theatres...In movie page, show seeding data, In movie detail page, show trailer using iframe tag according to the movie and description at bottom with showtime in right side of the page with "now showing" glass effect box with select theatre dropdown by importing it from firebase theatre and also show timing button and upon clicking the button it shld disppear and show the timings of movie , and below all of that, show "buy ticket" button and redirect to another page of buying it
