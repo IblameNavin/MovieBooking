@@ -1,9 +1,12 @@
 import {
   collection,
+  // eslint-disable-next-line no-unused-vars
   addDoc,
   getDocs,
+  // eslint-disable-next-line no-unused-vars
   deleteDoc,
   doc,
+  // eslint-disable-next-line no-unused-vars
   setDoc,
   writeBatch
 } from "firebase/firestore";
@@ -29,7 +32,7 @@ const fetchMoviesFromAPI = async () => {
         const trailer = videoData.results.find(v => v.type === "Trailer" && v.site === "YouTube");
         if (trailer) trailerKey = trailer.key;
       } catch (e) {
-        console.warn(`Could not fetch trailer for movie ${movie.id}`);
+        console.warn(`Could not fetch trailer for movie ${movie.id}`,e);
       }
 
       return {
@@ -244,7 +247,7 @@ export async function seedFirestore() {
       console.log(`Seeded batch ${Math.floor(i / chunkSize) + 1} of seats...`);
     }
 
-    console.log("Database Seeding Completed Successfully! 🚀");
+    console.log("Database Seeding Completed Successfully! ");
     return true;
 
   } catch (error) {

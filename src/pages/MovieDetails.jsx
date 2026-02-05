@@ -69,7 +69,7 @@ export const MovieDetails = () => {
 
   return (
     <div className="bg-gray-900 min-h-screen text-white flex flex-col">
-      <div className="container mx-auto px-4 py-8 flex-grow flex flex-col lg:flex-row gap-8">
+      <div className="container mx-auto px-4 py-8 grow flex flex-col lg:flex-row gap-8">
 
         {/* LEFT COLUMN: TRAILER & DESC */}
         <div className="lg:w-2/3 space-y-8">
@@ -136,7 +136,7 @@ export const MovieDetails = () => {
               </div>
 
               {/* Show Timing Button / Timings */}
-              <div className="min-h-[100px] flex items-center justify-center">
+              <div className="min-h-25 flex items-center justify-center">
                 {!showTimingsVisible ? (
                   <button
                     onClick={() => {
@@ -176,7 +176,7 @@ export const MovieDetails = () => {
                 <button
                   onClick={handleBuyTicket}
                   className={`w-full py-4 rounded-xl font-black text-xl tracking-wider transition uppercase shadow-lg ${selectedShowtime
-                      ? 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white transform hover:-translate-y-1'
+                      ? 'bg-linear-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white transform hover:-translate-y-1'
                       : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     }`}
                   disabled={!selectedShowtime}

@@ -19,6 +19,7 @@ export const Home = () => {
       try {
         const querySnapshot = await getDocs(collection(db, "movies"));
         const moviesList = querySnapshot.docs.map(doc => doc.data());
+        console.log("Fetched movies from Firebase:", moviesList);
         // Take first 16 movies
         setMovies(moviesList.slice(0, 16));
       } catch (error) {
@@ -54,7 +55,7 @@ export const Home = () => {
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
       {/* Hero Section with Carousel */}
-      <div className="relative w-full h-[500px] md:h-[600px] overflow-hidden">
+      <div className="relative w-full h-125 md:h-150 overflow-hidden">
         {movies.slice(0, 5).map((movie, index) => (
           <div
             key={movie.id}
@@ -67,7 +68,7 @@ export const Home = () => {
               className="w-full h-full object-cover"
             />
             {/* Overlay Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
 
             {/* Hero Content */}
             <div className="absolute bottom-16 left-8 md:left-16 text-white max-w-2xl">
@@ -122,7 +123,7 @@ export const Home = () => {
       </div>
 
       {/* Popular Movies Section */}
-      <main className="container mx-auto px-4 py-12 flex-grow">
+      <main className="container mx-auto px-4 py-12 grow">
         <h2 className="text-3xl font-bold mb-8 text-gray-800 border-l-4 border-red-600 pl-4">
           Popular Movies
         </h2>
@@ -134,7 +135,7 @@ export const Home = () => {
               onClick={() => navigate(`/movies/${movie.id}`)}
               className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition duration-300 transform hover:-translate-y-2 cursor-pointer"
             >
-              <div className="relative overflow-hidden aspect-[2/3]">
+              <div className="relative overflow-hidden aspect-2/3">
                 <img
                   src={`${POSTER_BASE_URL}${movie.poster_path}`}
                   alt={movie.title}

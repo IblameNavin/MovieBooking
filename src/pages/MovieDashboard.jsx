@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "../config/firebase";
-import { addDoc, collection, query, where, getDocs, writeBatch, doc } from "firebase/firestore";
+import {  collection, query, where, getDocs, writeBatch, doc } from "firebase/firestore";
 import { toast } from "react-toastify";
 
 export const MovieDashboard = () => {
@@ -165,7 +165,7 @@ export const MovieDashboard = () => {
             <h3 className="text-xl font-bold mb-6 text-center text-gray-200">Select Seats</h3>
 
             {/* Screen Visual */}
-            <div className="w-full h-8 bg-gradient-to-r from-gray-700 via-gray-500 to-gray-700 mb-12 rounded-lg text-center text-xs flex items-center justify-center tracking-[0.5em] text-black font-bold shadow-lg opacity-80 shadow-gray-600/50">
+            <div className="w-full h-8 bg-linear-to-r from-gray-700 via-gray-500 to-gray-700 mb-12 rounded-lg text-center text-xs flex items-center justify-center tracking-[0.5em] text-black font-bold shadow-lg opacity-80 shadow-gray-600/50">
               SCREEN
             </div>
 

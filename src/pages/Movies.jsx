@@ -25,7 +25,7 @@ export const Movies = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
-      <div className="container mx-auto px-4 py-8 flex-grow">
+      <div className="container mx-auto px-4 py-8 grow">
         <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">All Movies</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -34,7 +34,7 @@ export const Movies = () => {
               key={movie.id}
               className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition duration-300"
             >
-              <div className="relative overflow-hidden aspect-[2/3]">
+              <div className="relative overflow-hidden aspect-2/3">
                 <img
                   src={`${POSTER_BASE_URL}${movie.poster_path}`}
                   alt={movie.title}
