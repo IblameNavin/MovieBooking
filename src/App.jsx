@@ -15,10 +15,11 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Seeder } from './pages/Seeder';
 import { Contact } from './pages/Contact';
+import { AuthProvider } from './context/AuthContext';
 
 const App = () => {
   return (
-    <>
+    <AuthProvider>
       <Navbar />
       <ToastContainer position="top-right" autoClose={3000} />
       <Routes>
@@ -41,7 +42,7 @@ const App = () => {
 
         {/* Admin Route */}
       </Routes>
-    </>
+    </AuthProvider>
   )
 }
 
