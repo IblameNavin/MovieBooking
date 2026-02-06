@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { Skeleton } from "../components/Skeleton";
 import { useLocation, useNavigate } from "react-router-dom";
 import { auth, db } from "../config/firebase";
-import {  collection, query, where, getDocs, writeBatch, doc } from "firebase/firestore";
+import { collection, query, where, getDocs, writeBatch, doc } from "firebase/firestore";
 import { toast } from "react-toastify";
 
 export const MovieDashboard = () => {
@@ -85,6 +86,20 @@ export const MovieDashboard = () => {
 
     setIsBooking(true);
     try {
+      // 0. Check for duplicate booking
+      const q = query(
+        collection(db, "bookings"),
+        where("userId", "==", auth.currentUser.uid),
+        where("movieId", "==", movie.id)
+      );
+      const existingBookings = await getDocs(q);
+
+      if (!existingBookings.empty) {
+        toast.error("You have already booked tickets for this movie!");
+        setIsBooking(false);
+        return;
+      }
+
       const batch = writeBatch(db);
 
       // 1. Create Booking Record
@@ -129,7 +144,6 @@ export const MovieDashboard = () => {
   if (!movie || !showtime) return null;
 
   // Group seats by row for display
-  // Assume seatId is like "A1", "B2"
   const rows = {};
   seats.forEach(seat => {
     const row = seat.seatId.charAt(0);
@@ -138,96 +152,196 @@ export const MovieDashboard = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8">
-      <div className="container mx-auto max-w-5xl">
-        <h1 className="text-3xl font-bold mb-8 text-center border-b border-gray-700 pb-4">
-          Complete Your Booking
-        </h1>
+    <div className="min-h-screen bg-gray-900 text-white font-sans selection:bg-red-500 selection:text-white pb-12">
+      {/* Header */}
+      <div className="bg-gray-800/50 backdrop-blur-md sticky top-0 z-50 border-b border-gray-700">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="text-gray-400 hover:text-white transition flex items-center gap-2 cursor-pointer"
+          >
+            ← Back
+          </button>
+          <h1 className="text-xl font-bold tracking-wide uppercase">Select Seats</h1>
+          <div className="w-16"></div> {/* Spacer for center alignment */}
+        </div>
+      </div>
 
-        <div className="flex flex-col lg:flex-row gap-8">
-          {/* Movie Info Sidebar */}
-          <div className="lg:w-1/3 bg-gray-800 p-6 rounded-xl h-fit shadow-xl">
-            <img
-              src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-              alt={movie.title}
-              className="w-full rounded-lg mb-4 shadow-lg"
-            />
-            <h2 className="text-2xl font-bold mb-2">{movie.title}</h2>
-            <div className="text-gray-400 space-y-2 text-sm border-t border-gray-700 pt-4 mt-4">
-              <p><span className="text-white font-semibold">Theatre:</span> {showtime.theatreName}</p>
-              <p><span className="text-white font-semibold">Time:</span> {showtime.time}</p>
-              <p><span className="text-white font-semibold">Price per Ticket:</span> ${showtime.price}</p>
-            </div>
+      <div className="container mx-auto max-w-6xl px-4 mt-8 flex flex-col lg:flex-row gap-8">
+
+        {/* LEFT: SEAT MAP */}
+        <div className="flex-1 bg-gray-800 rounded-3xl p-8 shadow-2xl border border-gray-700 relative overflow-hidden">
+          {/* Background Glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-white/5 blur-3xl rounded-full pointer-events-none"></div>
+
+          {/* SCREEN */}
+          <div className="flex flex-col items-center mb-16 relative">
+            <div
+              className="w-3/4 h-16 bg-gradient-to-b from-white/20 to-transparent shadow-[0_20px_50px_rgba(255,255,255,0.1)] rounded-t-full transform perspective-lg rotate-x-12"
+              style={{ clipPath: "polygon(0 0, 100% 0, 90% 100%, 10% 100%)" }}
+            ></div>
+            <div className="text-gray-500 text-xs tracking-[0.5em] mt-2 font-bold opacity-50">SCREEN</div>
           </div>
 
-          {/* Seat Selection */}
-          <div className="lg:w-2/3 bg-gray-800 p-6 rounded-xl shadow-xl flex flex-col">
-            <h3 className="text-xl font-bold mb-6 text-center text-gray-200">Select Seats</h3>
-
-            {/* Screen Visual */}
-            <div className="w-full h-8 bg-linear-to-r from-gray-700 via-gray-500 to-gray-700 mb-12 rounded-lg text-center text-xs flex items-center justify-center tracking-[0.5em] text-black font-bold shadow-lg opacity-80 shadow-gray-600/50">
-              SCREEN
-            </div>
-
+          {/* SEATS GRID */}
+          <div className="flex flex-col gap-4 items-center justify-center mb-12 overflow-x-auto pb-8 custom-scrollbar">
             {loadingSeats ? (
-              <div className="text-center py-10">Loading Seats...</div>
-            ) : (
-              <div className="flex flex-col gap-3 items-center mb-8 overflow-x-auto pb-4">
-                {Object.keys(rows).sort().map(row => (
-                  <div key={row} className="flex items-center gap-4">
-                    <div className="w-6 text-center font-bold text-gray-500">{row}</div>
+              <div className="flex flex-col gap-4 items-center justify-center mb-12 animate-pulse">
+                {/* Skeleton Rows */}
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex gap-4 items-center">
+                    <Skeleton className="w-6 h-6 rounded bg-gray-700" />
                     <div className="flex gap-2">
-                      {rows[row].map(seat => {
-                        const isSelected = selectedSeats.find(s => s.docId === seat.docId);
-                        const isBooked = seat.status !== 'available';
-
-                        let seatColor = "bg-white hover:bg-gray-300"; // default available
-                        if (isBooked) seatColor = "bg-gray-600 cursor-not-allowed opacity-50";
-                        if (isSelected) seatColor = "bg-red-600 text-white scale-110 shadow-lg shadow-red-500/50";
-
-                        return (
-                          <button
-                            key={seat.docId}
-                            onClick={() => handleSeatClick(seat)}
-                            disabled={isBooked}
-                            className={`w-8 h-8 md:w-10 md:h-10 rounded-t-lg transition-all text-xs font-semibold flex items-center justify-center ${seatColor}`}
-                            title={`Row ${row}, Seat ${seat.seatId.substring(1)} - ${seat.type}`}
-                          >
-                            {seat.seatId.substring(1)}
-                          </button>
-                        );
-                      })}
+                      {Array.from({ length: 8 }).map((_, j) => (
+                        <Skeleton key={j} className="w-8 h-8 md:w-12 md:h-12 rounded-t-2xl rounded-b-lg bg-gray-700" />
+                      ))}
                     </div>
                   </div>
                 ))}
               </div>
-            )}
+            ) : (
+              Object.keys(rows).sort().map(row => (
+                <div key={row} className="flex items-center gap-6">
+                  <div className="w-6 text-gray-500 font-bold text-sm transform translate-y-1">{row}</div>
+                  <div className="flex gap-2 sm:gap-4">
+                    {rows[row].map(seat => {
+                      const isSelected = selectedSeats.find(s => s.docId === seat.docId);
+                      const isBooked = seat.status !== 'available';
 
-            <div className="mt-auto border-t border-gray-700 pt-6">
-              <div className="flex justify-between items-center mb-6">
-                <div>
-                  <p className="text-gray-400 text-sm">Selected Seats:</p>
-                  <p className="font-bold text-lg text-white">
-                    {selectedSeats.length > 0 ? selectedSeats.map(s => s.seatId).join(', ') : '-'}
-                  </p>
+                      // Seat Styles
+                      let seatClass = "bg-gray-700 hover:bg-gray-600 hover:scale-110 text-gray-400 shadow-md"; // Default
+
+                      if (isBooked) {
+                        seatClass = "bg-gray-800 cursor-not-allowed opacity-40 shadow-none ring-1 ring-gray-700";
+                      } else if (isSelected) {
+                        seatClass = "bg-red-600 text-white scale-110 shadow-[0_0_15px_rgba(220,38,38,0.6)] ring-2 ring-red-400 z-10";
+                      } else if (seat.type === 'VIP') {
+                        seatClass = "bg-purple-900/80 border border-purple-500/50 hover:bg-purple-700 text-purple-200 shadow-purple-900/20";
+                      }
+
+                      return (
+                        <div key={seat.docId} className="relative group">
+                          <button
+                            onClick={() => handleSeatClick(seat)}
+                            disabled={isBooked}
+                            className={`
+                              w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 
+                              rounded-t-2xl rounded-b-lg 
+                              transition-all duration-300 ease-out 
+                              flex items-center justify-center 
+                              text-[10px] md:text-xs font-bold
+                              cursor-pointer
+                              ${seatClass}
+                            `}
+                          >
+                            {/* Armrests visual trick */}
+                            <div className={`absolute -left-1 bottom-1 w-1 h-4 rounded-full ${isSelected ? 'bg-red-700' : isBooked ? 'hidden' : 'bg-black/20'}`}></div>
+                            <div className={`absolute -right-1 bottom-1 w-1 h-4 rounded-full ${isSelected ? 'bg-red-700' : isBooked ? 'hidden' : 'bg-black/20'}`}></div>
+
+                            {seat.seatId.substring(1)}
+                          </button>
+
+                          {/* Tooltip */}
+                          {!isBooked && (
+                            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-black text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none z-20">
+                              {seat.type} • ${showtime.price || (seat.type === 'VIP' ? 25 : 12)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-gray-400 text-sm">Total Price:</p>
-                  <p className="font-bold text-3xl text-red-500">${calculateTotal()}</p>
+              ))
+            )}
+          </div>
+
+          {/* LEGEND */}
+          <div className="flex flex-wrap justify-center gap-6 border-t border-gray-700/50 pt-6">
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <div className="w-5 h-5 bg-gray-700 rounded-t-lg"></div>
+              <span>Available</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <div className="w-5 h-5 bg-red-600 rounded-t-lg shadow-[0_0_10px_rgba(220,38,38,0.5)]"></div>
+              <span>Selected</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <div className="w-5 h-5 bg-purple-900/80 border border-purple-500/50 rounded-t-lg"></div>
+              <span>VIP</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <div className="w-5 h-5 bg-gray-800 opacity-50 border border-gray-700 rounded-t-lg"></div>
+              <span>Booked</span>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: BOOKING SUMMARY */}
+        <div className="w-full lg:w-96 flex flex-col gap-6">
+          <div className="bg-gray-800 rounded-3xl p-6 shadow-xl border border-gray-700">
+            <div className="flex gap-4 mb-6">
+              <img
+                src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
+                alt={movie.title}
+                className="w-24 h-36 object-cover rounded-xl shadow-lg"
+              />
+              <div>
+                <h3 className="text-xl font-bold text-white mb-1 leading-tight">{movie.title}</h3>
+                <p className="text-gray-400 text-sm mb-2">{showtime.theatreName}</p>
+                <div className="inline-block bg-gray-700/50 px-3 py-1 rounded-lg border border-gray-600 text-xs text-gray-300">
+                  {new Date().toLocaleDateString()} • {showtime.time}
                 </div>
               </div>
-
-              <button
-                onClick={handleConfirmBooking}
-                disabled={isBooking || selectedSeats.length === 0}
-                className={`w-full py-4 rounded-xl font-bold text-xl uppercase tracking-widest transition shadow-lg ${isBooking || selectedSeats.length === 0
-                    ? 'bg-gray-600 cursor-not-allowed opacity-70'
-                    : 'bg-red-600 hover:bg-red-700 hover:shadow-red-900/50 transform hover:-translate-y-1'
-                  }`}
-              >
-                {isBooking ? 'Processing...' : 'Confirm Booking'}
-              </button>
             </div>
+
+            <div className="border-t border-dashed border-gray-600 my-4"></div>
+
+            <div className="space-y-3">
+              <div className="flex justify-between text-gray-400 text-sm">
+                <span>Tickets ({selectedSeats.length})</span>
+                <span>$ {calculateTotal()}</span>
+              </div>
+              <div className="flex justify-between text-gray-400 text-sm">
+                <span>Booking Fee</span>
+                <span>$ {selectedSeats.length > 0 ? '2.00' : '0.00'}</span>
+              </div>
+              <div className="border-t border-gray-600 pt-3 mt-3 flex justify-between items-center text-white">
+                <span className="font-semibold">Total</span>
+                <span className="text-2xl font-bold text-red-500">$ {selectedSeats.length > 0 ? calculateTotal() + 2 : 0}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleConfirmBooking}
+              disabled={isBooking || selectedSeats.length === 0}
+              className={`
+                mt-8 w-full py-4 rounded-xl font-bold text-lg uppercase tracking-wider transition-all duration-300 
+                shadow-lg flex items-center justify-center gap-2 cursor-pointer
+                ${isBooking || selectedSeats.length === 0
+                  ? 'bg-gray-700 text-gray-500 cursor-not-allowed shadow-none'
+                  : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 hover:shadow-red-500/30 hover:-translate-y-1'
+                }
+              `}
+            >
+              {isBooking ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Processing...
+                </>
+              ) : (
+                'Confirm Booking'
+              )}
+            </button>
+          </div>
+
+          <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 text-center">
+            <p className="text-xs text-gray-500">
+              By proceeding, you agree to our Terms and Conditions.
+            </p>
           </div>
         </div>
       </div>

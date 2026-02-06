@@ -14,6 +14,7 @@ import { AdminRoute } from './components/AdminRoute'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Seeder } from './pages/Seeder';
+import { Contact } from './pages/Contact';
 
 const App = () => {
   return (
@@ -36,6 +37,9 @@ const App = () => {
 
         {/* Helper Route */}
         <Route path="/seed" element={<Seeder />} />
+        <Route path="/contact" element={<Contact />} />
+
+        {/* Admin Route */}
       </Routes>
     </>
   )

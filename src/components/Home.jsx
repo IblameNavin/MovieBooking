@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Skeleton } from "./Skeleton";
 import { Footer } from "./Footer";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -19,7 +20,7 @@ export const Home = () => {
       try {
         const querySnapshot = await getDocs(collection(db, "movies"));
         const moviesList = querySnapshot.docs.map(doc => doc.data());
-        console.log("Fetched movies from Firebase:", moviesList);
+        // console.log("Fetched movies from Firebase:", moviesList);
         // Take first 16 movies
         setMovies(moviesList.slice(0, 16));
       } catch (error) {
@@ -30,12 +31,11 @@ export const Home = () => {
     fetchMovies();
   }, []);
 
-  // Carousel Auto-slide logic
   useEffect(() => {
     if (movies.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % 5); // Cycle through top 5 movies
-    }, 3000); // 3 seconds
+      setCurrentSlide((prev) => (prev + 1) % 5);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [movies]);
@@ -49,7 +49,41 @@ export const Home = () => {
   };
 
   if (movies.length === 0) {
-    return <div className="min-h-screen flex items-center justify-center text-xl">Loading...</div>;
+    return (
+      <div className="bg-gray-50 min-h-screen flex flex-col">
+        {/* Skeleton Hero */}
+        <div className="relative w-full h-125 md:h-150 overflow-hidden bg-gray-200 animate-pulse">
+          <div className="absolute bottom-16 left-8 md:left-16 max-w-2xl space-y-4">
+            <Skeleton className="h-12 w-3/4 bg-gray-300 rounded-lg" />
+            <Skeleton className="h-6 w-1/2 bg-gray-300 rounded-lg" />
+            <div className="flex gap-4 pt-4">
+              <Skeleton className="h-12 w-32 bg-gray-300 rounded-full" />
+              <Skeleton className="h-12 w-40 bg-gray-300 rounded-full" />
+            </div>
+          </div>
+        </div>
+
+        {/* Skeleton Popular Movies */}
+        <main className="container mx-auto px-4 py-12 grow">
+          <Skeleton className="h-8 w-48 mb-8 bg-gray-200 rounded-lg" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div className="aspect-2/3 w-full">
+                  <Skeleton className="w-full h-full bg-gray-200" />
+                </div>
+                <div className="p-4 space-y-3">
+                  <Skeleton className="w-3/4 h-6 bg-gray-200 rounded-md" />
+                  <Skeleton className="w-1/2 h-4 bg-gray-200 rounded-md" />
+                  <Skeleton className="w-20 h-5 bg-gray-200 rounded-md mt-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   return (

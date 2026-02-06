@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Footer } from "../components/Footer";
 import { Link, useNavigate } from "react-router-dom";
+import { Skeleton } from "../components/Skeleton";
 
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../config/firebase";
 
 export const Movies = () => {
   const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const POSTER_BASE_URL = "https://image.tmdb.org/t/p/w500";
   const navigate = useNavigate();
 
@@ -18,6 +20,8 @@ export const Movies = () => {
         setMovies(moviesList);
       } catch (error) {
         console.error("Error fetching movies from Firebase:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchMovies();
@@ -29,47 +33,63 @@ export const Movies = () => {
         <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">All Movies</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-          {movies.map((movie) => (
-            <div
-              key={movie.id}
-              className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition duration-300"
-            >
-              <div className="relative overflow-hidden aspect-2/3">
-                <img
-                  src={`${POSTER_BASE_URL}${movie.poster_path}`}
-                  alt={movie.title}
-                  className="w-full h-full object-cover transition duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col gap-3 items-center justify-center">
-                  <button
-                    onClick={() => navigate(`/movies/${movie.id}`)}
-                    className="bg-transparent border-2 border-white text-white px-6 py-2 rounded-full font-bold hover:bg-white hover:text-black transition"
-                  >
-                    View Details
-                  </button>
-                  <Link
-                    to="/moviedashboard"
-                    state={{ movie }}
-                    className="bg-red-600 text-white px-6 py-2 rounded-full font-bold hover:bg-red-700 transition"
-                  >
-                    Book Now
-                  </Link>
+          {loading
+            ? Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
+                {/* Image Skeleton matching aspect-2/3 */}
+                <div className="aspect-2/3 w-full">
+                  <Skeleton className="w-full h-full bg-gray-200" />
+                </div>
+                {/* Content Skeleton matching padding and spacing */}
+                <div className="p-4 space-y-3">
+                  <Skeleton className="w-3/4 h-6 bg-gray-200 rounded-md" />
+                  <div className="flex justify-between items-center pt-2">
+                    <Skeleton className="w-20 h-4 bg-gray-200 rounded-md" />
+                    <Skeleton className="w-12 h-4 bg-gray-200 rounded-md" />
+                  </div>
                 </div>
               </div>
+            ))
+            : movies.map((movie) => (
+              <div
+                key={movie.id}
+                className="bg-white rounded-xl shadow-lg overflow-hidden group hover:shadow-2xl transition duration-300"
+              >
+                <div className="relative overflow-hidden aspect-2/3">
+                  <img
+                    src={`${POSTER_BASE_URL}${movie.poster_path}`}
+                    alt={movie.title}
+                    className="w-full h-full object-cover transition duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col gap-3 items-center justify-center">
+                    <button
+                      onClick={() => navigate(`/movies/${movie.id}`)}
+                      className="bg-transparent cursor-pointer border-2 border-white text-white px-6 py-2 rounded-full font-bold hover:bg-white hover:text-black transition"
+                    >
+                      View Details
+                    </button>
+                    <button
+                      onClick={() => navigate(`/movies/${movie.id}`)}
+                      className="bg-red-600 cursor-pointer text-white px-6 py-2 rounded-full font-bold hover:bg-red-700 transition"
+                    >
+                      Book Now
+                    </button>
+                  </div>
+                </div>
 
-              <div className="p-4">
-                <h3 className="text-lg font-bold mb-1 truncate" title={movie.title}>
-                  {movie.title}
-                </h3>
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                  <span>{movie.release_date}</span>
-                  <span className="flex items-center gap-1 text-yellow-600 font-semibold">
-                    ★ {movie.vote_average}
-                  </span>
+                <div className="p-4">
+                  <h3 className="text-lg font-bold mb-1 truncate" title={movie.title}>
+                    {movie.title}
+                  </h3>
+                  <div className="flex justify-between items-center text-sm text-gray-500">
+                    <span>{movie.release_date}</span>
+                    <span className="flex items-center gap-1 text-yellow-600 font-semibold">
+                      ★ {movie.vote_average}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       </div>
       <Footer />

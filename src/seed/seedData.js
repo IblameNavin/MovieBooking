@@ -32,7 +32,7 @@ const fetchMoviesFromAPI = async () => {
         const trailer = videoData.results.find(v => v.type === "Trailer" && v.site === "YouTube");
         if (trailer) trailerKey = trailer.key;
       } catch (e) {
-        console.warn(`Could not fetch trailer for movie ${movie.id}`,e);
+        console.warn(`Could not fetch trailer for movie ${movie.id}`, e);
       }
 
       return {
@@ -116,8 +116,8 @@ const generateShowtimes = (movies, theatres) => {
   const showtimes = [];
   let showCounter = 1;
 
-  // Only create showtimes for the first 10 movies to avoid explosion
-  const moviesToShow = movies.slice(0, 10);
+  // Create showtimes for all movies
+  const moviesToShow = movies;
 
   moviesToShow.forEach(movie => {
     theatres.forEach(theatre => {

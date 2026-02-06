@@ -4,7 +4,7 @@ import { Footer } from '../components/Footer';
 export const Admin = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <div className="container mx-auto px-4 py-8 flex-grow">
+      <div className="container mx-auto px-4 py-8 grow">
         <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Admin Dashboard</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

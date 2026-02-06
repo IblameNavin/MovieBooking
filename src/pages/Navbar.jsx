@@ -39,11 +39,13 @@ export const Navbar = () => {
               <Link to="/mybookings" className="hover:text-red-500 transition">My Bookings</Link>
             </li>
           )}
+          {Cookies.get("role") === "admin" && (
+            <li>
+              <Link to="/admin" className="hover:text-red-500 transition">Admin</Link>
+            </li>
+          )}
           <li>
-            <Link to="/admin" className="hover:text-red-500 transition">Admin</Link>
-          </li>
-          <li>
-            <Link to="/moviedashboard" className="hover:text-red-500 transition">Dashboard</Link>
+            <Link to="/contact" className="hover:text-red-500 transition">Contact</Link>
           </li>
         </ul>
 

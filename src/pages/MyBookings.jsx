@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Skeleton } from "../components/Skeleton";
 import { auth, db } from "../config/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { Footer } from "../components/Footer";
@@ -32,7 +33,36 @@ export const MyBookings = () => {
     fetchBookings();
   }, []);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (loading) return (
+    <div className="bg-gray-50 min-h-screen flex flex-col">
+      <div className="container mx-auto px-4 py-8 flex-grow">
+        <h1 className="text-3xl font-bold mb-8 text-center">My Bookings</h1>
+        <div className="grid gap-6">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="bg-white p-6 rounded-xl shadow-md flex flex-col md:flex-row gap-6">
+              {/* Poster Skeleton */}
+              <Skeleton className="flex-shrink-0 w-32 h-48 bg-gray-200 rounded-lg" />
+              <div className="flex-grow space-y-4">
+                {/* Title & Date */}
+                <div className="space-y-2">
+                  <Skeleton className="h-8 w-1/2 bg-gray-200 rounded-md" />
+                  <Skeleton className="h-4 w-1/4 bg-gray-200 rounded-md" />
+                </div>
+                {/* Details Grid Skeleton */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg">
+                  <Skeleton className="h-10 w-full bg-gray-200 rounded-md" />
+                  <Skeleton className="h-10 w-full bg-gray-200 rounded-md" />
+                  <Skeleton className="h-10 w-full bg-gray-200 rounded-md" />
+                  <Skeleton className="h-10 w-full bg-gray-200 rounded-md" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <Footer />
+    </div>
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col">
